@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Чат</title>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.5.2/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #89f7fe, #66a6ff);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        #loginContainer, #chatContainer {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            width: 400px;
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        #loginContainer.active, #chatContainer.active {
+            display: flex;
+        }
+
+        #loginContainer {
+            padding: 30px;
+            align-items: center;
+            text-align: center;
+        }
+
+        #loginContainer input {
+            padding: 10px;
+            width: 80%;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            font-size: 1em;
+        }
+
+        #loginContainer button {
+            padding: 10px 20px;
+            border: none;
+            background: #007bff;
+            color: white;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1em;
+        }
+
+        #loginContainer button:hover {
+            background: #0056b3;
+        }
+
+        #chatContainer {
+            height: 600px;
+        }
+
+        #messages {
+            list-style: none;
+            padding: 20px;
+            margin: 0;
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .message {
+            padding: 10px 15px;
+            margin-bottom: 10px;
+            border-radius: 15px;
+            max-width: 80%;
+            word-wrap: break-word;
+            position: relative;
+        }
+
+        .message.self {
+            background: #daf8cb;
+            align-self: flex-end;
+        }
+
+        .message.other {
+            background: #f1f0f0;
+            align-self: flex-start;
+        }
+
+        .message-header {
+            font-weight: bold;
+            margin-bottom: 3px;
+        }
+
+        .message-time {
+            font-size: 0.7em;
+            color: #777;
+            position: absolute;
+            bottom: 5px;
+            right: 10px;
+        }
+
+        #inputArea {
+            display: flex;
+            border-top: 1px solid #ddd;
+        }
+
+        #msgInput {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            outline: none;
+            font-size: 1em;
+        }
+
+        #sendBtn {
+            padding: 0 20px;
+            background: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 1em;
+        }
+
+        #sendBtn:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+<div id="loginContainer" class="active">
+    <h2>Добро пожаловать 👋</h2>
+    <input type="text" id="usernameInput" placeholder="Введите ваше имя">
+    <button id="loginBtn">Войти в чат</button>
+</div>
+
+<div id="chatContainer">
+    <ul id="messages"></ul>
+    <div id="inputArea">
+        <input type="text" id="msgInput" placeholder="Написать сообщение...">
+        <button id="sendBtn">➤</button>
+    </div>
+</div>
+
+<script>
+    const gatewayUrl = "http://localhost:8085"; // твой API Gateway
+    const wsUrl = "https://presumptuously-precontroversial-hsiu.ngrok-free.dev/ws"; // твой WebSocket URL
+    const roomId = 20;
+    let user = null;
+    let stompClient = null;
+
+    document.getElementById("loginBtn").addEventListener("click", async () => {
+        const username = document.getElementById("usernameInput").value.trim();
+        if (!username) return alert("Введите имя!");
+        try {
+            const res = await fetch("https://presumptuously-precontroversial-hsiu.ngrok-free.dev/users/create", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({ username })
+            });
+
+            if (!res.ok) throw new Error("Ошибка при регистрации");
+            user = await res.json();
+            console.log("Пользователь создан:", user);
+
+            document.getElementById("loginContainer").classList.remove("active");
+            document.getElementById("chatContainer").classList.add("active");
+
+            connectToChat();
+        } catch (e) {
+            alert("Ошибка при входе: " + e.message);
+        }
+    });
+
+    function connectToChat() {
+        const socket = new SockJS(wsUrl);
+        stompClient = Stomp.over(socket);
+
+        stompClient.connect({}, (frame) => {
+            console.log("Подключено:", frame);
+
+            stompClient.subscribe(`/topic/room${roomId}`, (message) => {
+                const msg = JSON.parse(message.body);
+                addMessageToList(msg.senderId, msg.senderName, msg.content, msg.createdAt);
+            });
+        }, (error) => {
+            console.error("Ошибка WebSocket:", error);
+        });
+
+        document.getElementById("sendBtn").addEventListener("click", sendMessage);
+        document.getElementById("msgInput").addEventListener("keypress", (e) => {
+            if (e.key === "Enter") sendMessage();
+        });
+    }
+
+    function addMessageToList(senderId, senderName, content, createdAt) {
+        const li = document.createElement("li");
+        li.className = "message " + (senderId === user.id ? "self" : "other");
+        const time = new Date(createdAt).toLocaleTimeString([], {hour: "2-digit", minute:"2-digit"});
+        li.innerHTML = `<div class="message-header">${senderName}</div>${content}<div class="message-time">${time}</div>`;
+        document.getElementById("messages").appendChild(li);
+        li.scrollIntoView({behavior: "smooth"});
+    }
+
+    function sendMessage() {
+        const content = document.getElementById("msgInput").value.trim();
+        if (!content) return;
+
+        const payload = {
+            roomId,
+            senderId: user.id,
+            content
+        };
+
+        stompClient.send("/app/chat.send", {}, JSON.stringify(payload));
+        document.getElementById("msgInput").value = "";
+    }
+</script>
+</body>
+</html>

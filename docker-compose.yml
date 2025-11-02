@@ -1,0 +1,157 @@
+version: '3.9'
+
+services:
+  # === USER SERVICE ===
+  userservice-db:
+    image: mysql:8.1
+    container_name: userserviceDbContainer
+    environment:
+      MYSQL_ROOT_PASSWORD: Qwerty_12345
+      MYSQL_DATABASE: userserviceNewDb
+    ports:
+      - "3303:3306"
+    volumes:
+      - userserviceNewDb-db-data:/var/lib/mysql
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-pQwerty_12345" ]
+      interval: 5s
+      retries: 10
+      start_period: 10s
+    networks:
+      - shared-net
+
+  redis:
+    image: redis:latest
+    container_name: redisContainer
+    ports:
+      - "6379:6379"
+    networks:
+      - shared-net
+
+  userservice-clean:
+    build: ./userservice-clean
+    container_name: userserviceCleanContainer
+    depends_on:
+      userservice-db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    ports:
+      - "8092:8092"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://userservice-db:3306/userserviceNewDb
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: Qwerty_12345
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_REDIS_HOST: redis
+    networks:
+      - shared-net
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:24.0.2
+    container_name: keycloakContainer
+    command: start-dev
+    environment:
+      KC_DB: mysql
+      KC_DB_URL: jdbc:mysql://userservice-db:3306/keycloakNewDb
+      KC_DB_USERNAME: root
+      KC_DB_PASSWORD: Qwerty_12345
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    ports:
+      - "9094:8080"
+    depends_on:
+      - userservice-db
+    restart: always
+    networks:
+      - shared-net
+
+  # === MESSAGE SERVICE ===
+  messageservice-db:
+    image: mysql:8.1
+    container_name: messageserviceDbContainer
+    environment:
+      MYSQL_ROOT_PASSWORD: Qwerty_12345
+      MYSQL_DATABASE: messageNewDb
+    ports:
+      - "3302:3306"
+    volumes:
+      - messageservice-db:/var/lib/mysql
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-pQwerty_12345" ]
+      interval: 5s
+      retries: 10
+      start_period: 10s
+    networks:
+      - shared-net
+
+  messageservice-clean:
+    build: ./messageservice-clean
+    container_name: messageserviceCleanContainer
+    depends_on:
+      messageservice-db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    ports:
+      - "8093:8093"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://messageservice-db:3306/messageNewDb
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: Qwerty_12345
+      SPRING_REDIS_HOST: redis
+      SPRING_REDIS_PORT: 6379
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://keycloak:8080/realms/NewRealm
+    networks:
+      - shared-net
+
+  # === CHAT SERVICE ===
+  chatservice-db:
+    image: mysql:8.1
+    container_name: chatserviceDbContainer
+    environment:
+      MYSQL_ROOT_PASSWORD: Qwerty_12345
+      MYSQL_DATABASE: chatserviceNewDb
+    ports:
+      - "3301:3306"
+    volumes:
+      - chatservice-db:/var/lib/mysql
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-pQwerty_12345" ]
+      interval: 5s
+      retries: 10
+      start_period: 10s
+    networks:
+      - shared-net
+
+  chatservice-clean:
+    build: ./chatservice-clean
+    container_name: chatserviceCleanContainer
+    depends_on:
+      chatservice-db:
+        condition: service_healthy
+      messageservice-clean:
+        condition: service_started
+      userservice-clean:
+        condition: service_started
+    ports:
+      - "8095:8095"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://chatservice-db:3306/chatserviceNewDb
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: Qwerty_12345
+      SPRING_REDIS_HOST: redis
+      SPRING_REDIS_PORT: 6379
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://keycloak:8080/realms/NewRealm
+    networks:
+      - shared-net
+
+# === ОБЩИЕ VOLUMES И СЕТЬ ===
+volumes:
+  userserviceNewDb-db-data:
+  messageservice-db:
+  chatservice-db:
+
+networks:
+  shared-net:
+    external: true
