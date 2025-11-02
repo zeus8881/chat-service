@@ -7,7 +7,7 @@ import reactor.core.publisher.Mono;
 
 @Component
 public class UserWebClient {
-    private final WebClient webClient = WebClient.create("http://userservice-clean:8092");
+    private final WebClient webClient = WebClient.create("http://userservice-clean:8091");
 
     public Mono<UserDTO> getUserById(Long id) {
         return webClient.get()

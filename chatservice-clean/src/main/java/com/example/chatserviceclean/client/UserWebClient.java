@@ -6,7 +6,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 @Component
 public class UserWebClient {
-    private final WebClient webClient = WebClient.create("http://userservice-clean:8092");
+    private final WebClient webClient = WebClient.create("http://userservice-clean:8091");
 
     public UserDTO getUserById(Long id) {
         return webClient.get()

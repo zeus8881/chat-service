@@ -6,7 +6,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 @Component
 public class ChatRoomWebClient {
-    private final WebClient webClient = WebClient.create("http://chatroomservice-clean:8096");
+    private final WebClient webClient = WebClient.create("http://chatservice-clean:8096");
 
     public ChatRoomDTO getChatRoomById(Long id) {
         return webClient.get()

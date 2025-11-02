@@ -31,7 +31,7 @@ import reactor.core.publisher.Mono;
 import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -73,7 +73,7 @@ class MessageControllerTest {
         userDTO = new UserDTO(1L, "Anton");
         chatRoomDTO = new ChatRoomDTO(1L, "Chat room");
         Mockito.when(userWebClient.getUserById(Mockito.anyLong())).thenReturn(Mono.just(userDTO));
-        Mockito.when(chatRoomWebClient.getChatRoomById(Mockito.anyLong())).thenReturn(Mono.just(chatRoomDTO));
+        Mockito.when(chatRoomWebClient.getChatRoomById(Mockito.anyLong())).thenReturn(chatRoomDTO);
 
         Message savedMessage = new Message();
         savedMessage.setId(1L);
@@ -106,18 +106,56 @@ class MessageControllerTest {
     }
 
     @Test
-    void getMessageById() {
+    void getMessageById() throws Exception {
+        MessageDTO messageDTO = new MessageDTO(null, null, null, "new content", null, null, null, null);
+        String json = objectMapper.writeValueAsString(messageDTO);
+        mockMvc.perform(get("/messages/by-id/1")
+                        .content(json))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").exists())
+                .andReturn();
     }
 
     @Test
-    void getMessageByChatId() {
+    void getMessageByChatId() throws Exception {
+        MessageDTO messageDTO = new MessageDTO(null, null, null, "new content", null, null, null, null);
+        String json = objectMapper.writeValueAsString(messageDTO);
+        mockMvc.perform(get("/messages/by-room/1")
+                        .content(json))
+                .andExpect(jsonPath("$.roomId").value(1L))
+                .andReturn();
     }
 
     @Test
-    void deleteMessage() {
+    void deleteMessage() throws Exception {
+        MessageDTO messageDTO = new MessageDTO(null, null, null, "new content", null, null, null, null);
+        String json = objectMapper.writeValueAsString(messageDTO);
+        mockMvc.perform(delete("/messages/delete/1")
+                        .content(json))
+                .andExpect(status().isNoContent())
+                .andReturn();
     }
 
     @Test
-    void updateMessage() {
+    void updateMessage() throws Exception {
+        MessageDTO messageDTO = new MessageDTO(null, null, null, "new content", null, null, null, null);
+        String json = objectMapper.writeValueAsString(messageDTO);
+        mockMvc.perform(put("/messages/update/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(jsonPath("$.id").exists())
+                .andExpect(jsonPath("$.content").value("new content"))
+                .andReturn();
+
+        MessageDTO newContent = new MessageDTO(null, null, null, "new content2", null, null, null, null);
+        String neJson = objectMapper.writeValueAsString(newContent);
+
+        mockMvc.perform(put("/messages/update/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(neJson))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").exists())
+                .andExpect(jsonPath("$.content").value("new content2"))
+                .andReturn();
     }
 }
