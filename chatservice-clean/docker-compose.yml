@@ -1,0 +1,46 @@
+services:
+  chatservice-db:
+    image: mysql:8.1
+    container_name: chatserviceContainer
+    environment:
+      MYSQL_ROOT_PASSWORD: Qwerty_12345
+      MYSQL_DATABASE: chatserviceNewDb
+    ports:
+      - "3301:3306"
+    volumes:
+      - chatservice-db:/var/lib/mysql
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-pQwerty_12345" ]
+      interval: 5s
+      retries: 10
+      start_period: 10s
+    networks:
+      - shared-net
+
+
+  chatservice-clean:
+    build: .
+    container_name: chatserviceCleanContainer
+    depends_on:
+      chatservice-db:
+        condition: service_healthy
+    ports:
+      - "8095:8095"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://chatservice-db:3306/chatserviceNewDb
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: Qwerty_12345
+      SPRING_REDIS_HOST: redisContainer
+      SPRING_REDIS_PORT: 6379
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://keycloakContainer:8080/realms/NewRealm
+    networks:
+      - shared-net
+
+
+volumes:
+  chatservice-db:
+
+
+networks:
+  shared-net:
+    external: true

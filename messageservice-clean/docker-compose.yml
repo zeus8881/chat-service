@@ -1,0 +1,48 @@
+services:
+  messageservice-db:
+    image: mysql:8.1
+    container_name: messageserviceContainer
+    environment:
+      MYSQL_ROOT_PASSWORD:  Qwerty_12345
+      MYSQL_DATABASE: messageNewDb
+    ports:
+      - "3302:3306"
+    volumes:
+      - messageservice-db:/var/lib/mysql
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-pQwerty_12345" ]
+      interval: 5s
+      retries: 10
+      start_period: 10s
+    networks:
+      - shared-net
+
+
+  messageservice-clean:
+    build: .
+    container_name: messageserviceCleanContainer
+    depends_on:
+      messageservice-db:
+        condition: service_healthy
+    ports:
+      - "8093:8093"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://messageservice-db:3306/messageNewDb
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: Qwerty_12345
+      SPRING_REDIS_HOST: redisContainer
+      SPRING_REDIS_PORT: 6379
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://keycloakContainer:8080/realms/NewRealm
+    networks:
+      - shared-net
+
+
+volumes:
+  messageservice-db:
+
+
+networks:
+  shared-net:
+    external: true
+
+

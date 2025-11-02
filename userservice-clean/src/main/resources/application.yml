@@ -1,0 +1,71 @@
+spring:
+  application:
+    name: userservice-clean
+
+  datasource:
+    username: root
+    password: Qwerty_12345
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://userservice-db:3306/userserviceNewDb
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        hbm2ddl:
+          drop_constraints: true
+    generate-ddl: true
+    open-in-view: true
+    show-sql: true
+
+  data:
+    redis:
+      port: 6379
+      host: redisContainer
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://keycloakContainer:8080/realms/NewRealm
+      client:
+        registration:
+          keycloak:
+            client-id: mySpringBootClient
+            client-secret: 8ZhRbsEC0Su2k2NS2Yv6oDw3YBkk63Lp
+            scope: openid
+            authorization-grant-type: authorization_code
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+        provider:
+          keycloak:
+            issuer-uri: http://keycloakContainer:9094/realms/NewRealm
+            user-name-attribute: preferred_username
+
+
+logging:
+  level:
+    org.hibernate: warn
+    web: DEBUG
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, metrics, info, prometheus
+  metrics:
+    distribution:
+      percentiles-histogram:
+        "[http.server.requests]": true
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+  endpoint:
+    health:
+      show-details: always
+
+
+server:
+  port: 8091
+  address: 0.0.0.0
