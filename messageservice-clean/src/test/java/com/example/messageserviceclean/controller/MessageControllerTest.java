@@ -54,8 +54,6 @@ class MessageControllerTest {
 
     @MockitoBean
     private MessageRepository messageRepository;
-    private UserDTO userDTO;
-    private ChatRoomDTO chatRoomDTO;
 
     @DynamicPropertySource
     static void properties(DynamicPropertyRegistry registry) {
@@ -67,8 +65,8 @@ class MessageControllerTest {
 
     @BeforeEach
     void setUp() {
-        userDTO = new UserDTO(1L, "Anton");
-        chatRoomDTO = new ChatRoomDTO(1L, "Chat room");
+        UserDTO userDTO = new UserDTO(1L, "Anton");
+        ChatRoomDTO chatRoomDTO = new ChatRoomDTO(1L, "Chat room");
         Mockito.when(userWebClient.getUserById(Mockito.anyLong())).thenReturn(userDTO);
         Mockito.when(chatRoomWebClient.getChatRoomById(Mockito.anyLong())).thenReturn(chatRoomDTO);
 
