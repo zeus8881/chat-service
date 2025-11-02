@@ -43,8 +43,7 @@ public class MessageServiceImpl implements MessageService {
         message.setSenderId(senderId);
         message.setStatus(Status.DELIVERED);
 
-        UserDTO userDTO = webClient.getUserById(senderId)
-                .block();
+        UserDTO userDTO = webClient.getUserById(senderId);
 
         ChatRoomDTO chatRoomDTO = chatRoomWebClient.getChatRoomById(chatId);
         Message save = messageRepository.save(message);
@@ -73,8 +72,7 @@ public class MessageServiceImpl implements MessageService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatusCode.valueOf(404), "Message not found"));
         message.setStatus(Status.READ);
 
-        UserDTO userDTO = webClient.getUserById(message.getSenderId())
-                .block();
+        UserDTO userDTO = webClient.getUserById(message.getSenderId());
 
         ChatRoomDTO chatRoomDTO = chatRoomWebClient.getChatRoomById(message.getRoomId());
 
@@ -92,8 +90,7 @@ public class MessageServiceImpl implements MessageService {
 
         Message save = messageRepository.save(message);
 
-        UserDTO userDTO = webClient.getUserById(message.getSenderId())
-                .block();
+        UserDTO userDTO = webClient.getUserById(message.getSenderId());
         ChatRoomDTO chatRoomDTO = chatRoomWebClient.getChatRoomById(message.getRoomId());
 
         MessageDTO messageDTO = messageMapper.toDTO(save, userDTO, chatRoomDTO);
@@ -119,8 +116,7 @@ public class MessageServiceImpl implements MessageService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatusCode.valueOf(404), "Message not found"));
         message.setContent(newContent);
 
-        UserDTO userDTO = webClient.getUserById(message.getSenderId())
-                .block();
+        UserDTO userDTO = webClient.getUserById(message.getSenderId());
         ChatRoomDTO chatRoomDTO = chatRoomWebClient.getChatRoomById(message.getRoomId());
 
         Message save = messageRepository.save(message);

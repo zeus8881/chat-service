@@ -25,12 +25,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.shaded.org.checkerframework.checker.units.qual.A;
-import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -72,7 +69,7 @@ class MessageControllerTest {
     void setUp() {
         userDTO = new UserDTO(1L, "Anton");
         chatRoomDTO = new ChatRoomDTO(1L, "Chat room");
-        Mockito.when(userWebClient.getUserById(Mockito.anyLong())).thenReturn(Mono.just(userDTO));
+        Mockito.when(userWebClient.getUserById(Mockito.anyLong())).thenReturn(userDTO);
         Mockito.when(chatRoomWebClient.getChatRoomById(Mockito.anyLong())).thenReturn(chatRoomDTO);
 
         Message savedMessage = new Message();
