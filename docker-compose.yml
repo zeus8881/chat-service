@@ -20,22 +20,12 @@ services:
     networks:
       - shared-net
 
-  redis:
-    image: redis:latest
-    container_name: redisContainer
-    ports:
-      - "6379:6379"
-    networks:
-      - shared-net
-
   userservice-clean:
     build: ./userservice-clean
     container_name: userserviceCleanContainer
     depends_on:
       userservice-db:
         condition: service_healthy
-      redis:
-        condition: service_started
     ports:
       - "8092:8091"
     environment:
@@ -43,7 +33,6 @@ services:
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: Qwerty_12345
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
-      SPRING_REDIS_HOST: redis
     networks:
       - shared-net
 
@@ -91,16 +80,12 @@ services:
     depends_on:
       messageservice-db:
         condition: service_healthy
-      redis:
-        condition: service_started
     ports:
-      - "8093:8093"
+      - "8093:8094"
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://messageservice-db:3306/messageNewDb
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: Qwerty_12345
-      SPRING_REDIS_HOST: redis
-      SPRING_REDIS_PORT: 6379
       SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://keycloak:8080/realms/NewRealm
     networks:
       - shared-net
@@ -133,15 +118,13 @@ services:
       messageservice-clean:
         condition: service_started
       userservice-clean:
-        condition: service_started
+        condition: service_healthy
     ports:
-      - "8095:8095"
+      - "8095:8096"
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://chatservice-db:3306/chatserviceNewDb
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: Qwerty_12345
-      SPRING_REDIS_HOST: redis
-      SPRING_REDIS_PORT: 6379
       SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://keycloak:8080/realms/NewRealm
     networks:
       - shared-net

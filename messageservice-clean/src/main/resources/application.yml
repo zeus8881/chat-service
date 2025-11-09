@@ -19,11 +19,6 @@ spring:
     open-in-view: true
     show-sql: true
 
-  data:
-    redis:
-      port: 6379
-      host: redisContainer
-
   security:
     oauth2:
       resourceserver:
@@ -51,7 +46,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: health, metrics, info, prometheus
+        include: *
   metrics:
     distribution:
       percentiles-histogram:
@@ -63,6 +58,9 @@ management:
   endpoint:
     health:
       show-details: always
+  health:
+    redis:
+      enabled: false
 
 server:
   port: 8094

@@ -15,7 +15,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -29,7 +28,6 @@ public class MessageServiceImpl implements MessageService {
     private final MessageMapper messageMapper;
     private final UserWebClient webClient;
     private final ChatRoomWebClient chatRoomWebClient;
-    private final RedisTemplate<String, MessageDTO> redisTemplate;
 
 
     @Override
@@ -56,18 +54,11 @@ public class MessageServiceImpl implements MessageService {
                 chatRoomDTO,
                 userDTO.username());
 
-        redisTemplate.opsForValue().set(getCachedKey(save.getId()), dto);
         return ResponseEntity.ok(dto);
     }
 
     @Override
     public ResponseEntity<MessageDTO> getMessageById(Long id) {
-        String key = getCachedKey(id);
-        MessageDTO cachedDTO = redisTemplate.opsForValue().get(key);
-
-        if (cachedDTO != null) {
-            return ResponseEntity.ok(cachedDTO);
-        }
         Message message = messageRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatusCode.valueOf(404), "Message not found"));
         message.setStatus(Status.READ);
@@ -77,7 +68,6 @@ public class MessageServiceImpl implements MessageService {
         ChatRoomDTO chatRoomDTO = chatRoomWebClient.getChatRoomById(message.getRoomId());
 
         MessageDTO dto = messageMapper.toDTO(message, userDTO, chatRoomDTO);
-        redisTemplate.opsForValue().set(key, dto);
 
         return ResponseEntity.ok(dto);
     }
@@ -94,7 +84,6 @@ public class MessageServiceImpl implements MessageService {
         ChatRoomDTO chatRoomDTO = chatRoomWebClient.getChatRoomById(message.getRoomId());
 
         MessageDTO messageDTO = messageMapper.toDTO(save, userDTO, chatRoomDTO);
-        redisTemplate.opsForValue().set(getCachedKey(save.getId()), messageDTO);
 
         return ResponseEntity.ok(messageDTO);
     }
@@ -121,12 +110,7 @@ public class MessageServiceImpl implements MessageService {
 
         Message save = messageRepository.save(message);
         MessageDTO dto = messageMapper.toDTO(save, userDTO, chatRoomDTO);
-        redisTemplate.opsForValue().set(getCachedKey(save.getId()), dto);
 
         return ResponseEntity.ok(dto);
-    }
-
-    private String getCachedKey(Long id) {
-        return "message-" + id;
     }
 }

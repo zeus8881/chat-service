@@ -1,6 +1,5 @@
 package com.example.chatserviceclean.service.impl;
 
-import com.example.chatserviceclean.client.MessageWebClient;
 import com.example.chatserviceclean.client.UserWebClient;
 import com.example.chatserviceclean.dto.MemberShipDTO;
 import com.example.chatserviceclean.dto.UserDTO;
@@ -29,7 +28,6 @@ public class MemberShipServiceImpl implements MemberShipService {
     private final ChatRoomMapper chatRoomMapper;
     private final MemberShipMapper memberShipMapper;
     private final UserWebClient userWebClient;
-    private final MessageWebClient webClient;
 
     @Override
     public ResponseEntity<MemberShipDTO> addUserToRoom(Long senderId, Long roomId, MemberShipDTO memberShipDTO) {

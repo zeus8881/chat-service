@@ -19,11 +19,6 @@ spring:
     open-in-view: true
     show-sql: true
 
-  data:
-    redis:
-      port: 6379
-      host: redisContainer
-
   security:
     oauth2:
       resourceserver:
@@ -42,17 +37,17 @@ spring:
             issuer-uri: http://keycloakContainer:9094/realms/NewRealm
             user-name-attribute: preferred_username
 
-
 logging:
   level:
     org.hibernate: warn
     web: DEBUG
+    redis: DEBUG
 
 management:
   endpoints:
     web:
       exposure:
-        include: health, metrics, info, prometheus
+        include: *
   metrics:
     distribution:
       percentiles-histogram:
@@ -64,6 +59,9 @@ management:
   endpoint:
     health:
       show-details: always
+  health:
+    redis:
+      enabled: false
 
 
 server:
