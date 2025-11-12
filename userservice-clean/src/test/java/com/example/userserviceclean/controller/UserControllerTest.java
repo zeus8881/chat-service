@@ -53,7 +53,7 @@ class UserControllerTest {
 
     @Test
     void createUser() throws Exception {
-        UserDTO userDTO = new UserDTO(null, "anton", "123", "1234567", Role.USER);
+        UserDTO userDTO = new UserDTO(null, "anton", "123");
         String json = objectMapper.writeValueAsString(userDTO);
 
         mockMvc.perform(post("/users/create")
@@ -66,7 +66,7 @@ class UserControllerTest {
 
     @Test
     void getUserById() throws Exception {
-        UserDTO userDTO = new UserDTO(null, "anton", "123", "1234567", Role.USER);
+        UserDTO userDTO = new UserDTO(null, "anton", "123");
         String json = objectMapper.writeValueAsString(userDTO);
 
         var create = mockMvc.perform(post("/users/create")
@@ -89,7 +89,7 @@ class UserControllerTest {
 
     @Test
     void updateUser() throws Exception {
-        UserDTO userDTO = new UserDTO(null, "anton", "123", "1234567", Role.USER);
+        UserDTO userDTO = new UserDTO(null, "anton", "123");
         String json = objectMapper.writeValueAsString(userDTO);
 
         var create = mockMvc.perform(post("/users/create")
@@ -100,7 +100,7 @@ class UserControllerTest {
                 .andReturn();
         var userId = objectMapper.readTree(create.getResponse().getContentAsString()).get("id").asLong();
 
-        UserDTO updateUser = new UserDTO(userId, "sergey", "123", "1234567", Role.ADMIN);
+        UserDTO updateUser = new UserDTO(userId, "sergey", "123");
         String updateJson = objectMapper.writeValueAsString(updateUser);
 
         mockMvc.perform(put("/users/update/" + userId)

@@ -53,8 +53,6 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatusCode.valueOf(404), "User not found"));
 
         user.setUsername(userDTO.username());
-        user.setEmail(userDTO.email());
-        user.setRole(userDTO.role());
         user.setPasswordHash(userDTO.passwordHash());
 
         userRepository.save(user);

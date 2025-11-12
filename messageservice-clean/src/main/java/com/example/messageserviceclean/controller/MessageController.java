@@ -6,6 +6,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/messages")
@@ -27,11 +29,11 @@ public class MessageController {
     }
 
     @GetMapping("/by-room/{roomId}")
-    public ResponseEntity<MessageDTO> getMessageByChatId(
+    public ResponseEntity<List<MessageDTO>> getMessageByChatId(
             @PathVariable Long roomId,
             @RequestParam int page,
             @RequestParam int size) {
-        return messageService.getMessageByChatId(roomId, size, page);
+        return messageService.getMessageByChatId(roomId, page, size);
     }
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> deleteMessage(

@@ -21,20 +21,25 @@ services:
       - shared-net
 
   userservice-clean:
-    build: ./userservice-clean
-    container_name: userserviceCleanContainer
-    depends_on:
-      userservice-db:
-        condition: service_healthy
-    ports:
-      - "8092:8091"
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://userservice-db:3306/userserviceNewDb
-      SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: Qwerty_12345
-      SPRING_JPA_HIBERNATE_DDL_AUTO: update
-    networks:
-      - shared-net
+  build: ./userservice-clean
+  container_name: userserviceCleanContainer
+  depends_on:
+    userservice-db:
+      condition: service_healthy
+  ports:
+    - "8092:8091" 
+  environment:
+    SPRING_DATASOURCE_URL: jdbc:mysql://userservice-db:3306/userserviceNewDb
+    SPRING_DATASOURCE_USERNAME: root
+    SPRING_DATASOURCE_PASSWORD: Qwerty_12345
+    SPRING_JPA_HIBERNATE_DDL_AUTO: update
+  healthcheck:
+    test: ["CMD", "curl", "-f", "http://localhost:8091/actuator/health || exit 1"]
+    interval: 5s
+    retries: 10
+    start_period: 10s
+  networks:
+    - shared-net
 
   keycloak:
     image: quay.io/keycloak/keycloak:24.0.2

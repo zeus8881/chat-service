@@ -8,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class ChatService {
@@ -22,13 +24,13 @@ public class ChatService {
                 senderId,
                 messageDTO.content(),
                 messageDTO.createdAt(),
-                userDTO.name());
+                userDTO.username());
         MessageDTO saved = messageWebClient.sendMessage(roomId, senderId, dtoWithSender);
 
         simpMessagingTemplate.convertAndSend("/topic/room" + roomId, saved);
     }
 
-    public MessageDTO getMessageFromRoom(Long chatId, int page, int size) {
+    public List<MessageDTO> getMessageFromRoom(Long chatId, int page, int size) {
         return messageWebClient.getMessages(chatId, page, size);
     }
 }

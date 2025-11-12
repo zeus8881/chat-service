@@ -20,6 +20,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -36,9 +39,10 @@ public class MessageServiceImpl implements MessageService {
             log.warn("Error. Id is null.");
             return ResponseEntity.badRequest().build();
         }
-        Message message = messageMapper.toModel(messageDTO);
+        Message message = new Message();
         message.setRoomId(chatId);
         message.setSenderId(senderId);
+        message.setCreatedAt(LocalDateTime.now());
         message.setStatus(Status.DELIVERED);
 
         UserDTO userDTO = webClient.getUserById(senderId);
@@ -73,19 +77,17 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
-    public ResponseEntity<MessageDTO> getMessageByChatId(Long chatId, Integer limit, Integer offset) {
-        Message message = new Message();
-        Pageable pageable = PageRequest.of(limit, offset, Sort.by("createdAt").descending());
-        messageRepository.findByRoomIdAndCreatedAt(chatId, message.getCreatedAt(), pageable);
+    public ResponseEntity<List<MessageDTO>> getMessageByChatId(Long chatId, Integer page, Integer size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        List<Message> messages = messageRepository.findByRoomId(chatId, pageable);
+        List<MessageDTO> dtos = messages.stream()
+                .map(msg -> messageMapper.toDTO(
+                        msg,
+                        webClient.getUserById(msg.getSenderId()),
+                        chatRoomWebClient.getChatRoomById(msg.getRoomId())))
+                .toList();
 
-        Message save = messageRepository.save(message);
-
-        UserDTO userDTO = webClient.getUserById(message.getSenderId());
-        ChatRoomDTO chatRoomDTO = chatRoomWebClient.getChatRoomById(message.getRoomId());
-
-        MessageDTO messageDTO = messageMapper.toDTO(save, userDTO, chatRoomDTO);
-
-        return ResponseEntity.ok(messageDTO);
+        return ResponseEntity.ok(dtos);
     }
 
     @Override
