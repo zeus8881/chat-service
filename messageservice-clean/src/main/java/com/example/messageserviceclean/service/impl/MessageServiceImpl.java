@@ -12,6 +12,7 @@ import com.example.messageserviceclean.repository.MessageRepository;
 import com.example.messageserviceclean.service.MessageService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -43,11 +44,12 @@ public class MessageServiceImpl implements MessageService {
         message.setRoomId(chatId);
         message.setSenderId(senderId);
         message.setCreatedAt(LocalDateTime.now());
+        message.setContent(messageDTO.content());
         message.setStatus(Status.DELIVERED);
 
         UserDTO userDTO = webClient.getUserById(senderId);
-
         ChatRoomDTO chatRoomDTO = chatRoomWebClient.getChatRoomById(chatId);
+
         Message save = messageRepository.save(message);
         MessageDTO dto = new MessageDTO(save.getId(),
                 save.getRoomId(),
@@ -79,12 +81,14 @@ public class MessageServiceImpl implements MessageService {
     @Override
     public ResponseEntity<List<MessageDTO>> getMessageByChatId(Long chatId, Integer page, Integer size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
-        List<Message> messages = messageRepository.findByRoomId(chatId, pageable);
-        List<MessageDTO> dtos = messages.stream()
-                .map(msg -> messageMapper.toDTO(
-                        msg,
-                        webClient.getUserById(msg.getSenderId()),
-                        chatRoomWebClient.getChatRoomById(msg.getRoomId())))
+        Page<Message> messages = messageRepository.findByRoomId(chatId, pageable);
+        List<Message> messagesList = messages.getContent();
+        List<MessageDTO> dtos = messagesList.stream()
+                .map(msg -> {
+                    UserDTO userDTO = webClient.getUserById(msg.getSenderId());
+                    ChatRoomDTO chatRoomDTO = chatRoomWebClient.getChatRoomById(msg.getRoomId());
+                    return messageMapper.toDTO(msg, userDTO, chatRoomDTO);
+                })
                 .toList();
 
         return ResponseEntity.ok(dtos);

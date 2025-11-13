@@ -10,7 +10,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
     properties:
       hibernate:
         hbm2ddl:
@@ -31,7 +31,7 @@ spring:
             client-secret: 8ZhRbsEC0Su2k2NS2Yv6oDw3YBkk63Lp
             scope: openid
             authorization-grant-type: authorization_code
-            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"1
         provider:
           keycloak:
             issuer-uri: http://keycloakContainer:9094/realms/NewRealm

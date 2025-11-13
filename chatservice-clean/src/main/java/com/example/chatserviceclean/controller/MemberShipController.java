@@ -36,7 +36,7 @@ public class MemberShipController {
         return memberShipService.deleteUserInRoom(userId, roomId);
     }
 
-    @GetMapping("/isUserInRoom?{userId}/{roomId}")
+    @GetMapping("/isUserInRoom/{userId}/{roomId}")
     public ResponseEntity<Boolean> isUserInRoom(
             @PathVariable Long userId,
             @PathVariable Long roomId) {

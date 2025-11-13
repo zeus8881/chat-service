@@ -14,5 +14,6 @@ public class ChatRoomWebClient {
                 .retrieve()
                 .bodyToMono(ChatRoomDTO.class)
                 .block();
+
     }
 }
