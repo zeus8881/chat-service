@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -14,7 +15,7 @@ import java.util.List;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-public class ChatWebSocketController { ;
+public class ChatWebSocketController {
     private final ChatService chatService;
 
     @MessageMapping("/chat.send")
@@ -26,7 +27,9 @@ public class ChatWebSocketController { ;
 
     @GetMapping("/chat/{chatId}")
     public List<MessageDTO> getMessages(
-            @PathVariable Long chatId) {
-        return chatService.getMessageFromRoom(chatId);
+            @PathVariable Long chatId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        return chatService.getMessageFromRoom(chatId, page, size);
     }
 }

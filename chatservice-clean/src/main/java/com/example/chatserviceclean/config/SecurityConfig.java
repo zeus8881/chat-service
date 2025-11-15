@@ -19,7 +19,8 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorizationManagerRequestMatcherRegistry ->
-                        authorizationManagerRequestMatcherRegistry.anyRequest().permitAll())
+                        authorizationManagerRequestMatcherRegistry.requestMatchers("/messages/**").permitAll()
+                                .anyRequest().authenticated())
                 .oauth2ResourceServer(httpSecurityOAuth2ResourceServerConfigurer ->
                         httpSecurityOAuth2ResourceServerConfigurer.jwt(jwtConfigurer ->
                                 jwtConfigurer.jwtAuthenticationConverter(jwtAuthenticationConverter())));

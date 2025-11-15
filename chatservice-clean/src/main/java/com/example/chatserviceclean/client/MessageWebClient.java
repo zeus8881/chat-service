@@ -8,7 +8,6 @@ import java.util.List;
 
 @Component
 public class MessageWebClient {
-
     private final WebClient webClient = WebClient.create("http://messageservice-clean:8094");
 
     public List<MessageDTO> getMessages(Long chatId, int page, int size) {

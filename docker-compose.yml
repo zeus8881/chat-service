@@ -27,7 +27,7 @@ services:
     userservice-db:
       condition: service_healthy
   ports:
-    - "8092:8091" 
+    - "8091:8091" 
   environment:
     SPRING_DATASOURCE_URL: jdbc:mysql://userservice-db:3306/userserviceNewDb
     SPRING_DATASOURCE_USERNAME: root

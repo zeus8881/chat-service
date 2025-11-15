@@ -26,10 +26,8 @@ public class UserServiceImpl implements UserService {
     public ResponseEntity<UserDTO> createUser(UserDTO userDTO) {
         User user = userMapper.toModel(userDTO);
 
-        if (user.getPasswordHash().length() < 6) {
-            log.warn("Password is too short");
-            return ResponseEntity.badRequest()
-                    .build();
+        if (user.getPasswordHash().length() < 6 || user.getPassword() == null) {
+            throw new ResponseStatusException(HttpStatusCode.valueOf(400), "Invalid password");
         }
         User save = userRepository.save(user);
         UserDTO dto = userMapper.toDTO(save);
