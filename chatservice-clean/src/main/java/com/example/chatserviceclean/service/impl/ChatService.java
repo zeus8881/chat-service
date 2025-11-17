@@ -5,12 +5,16 @@ import com.example.chatserviceclean.client.UserWebClient;
 import com.example.chatserviceclean.dto.MessageDTO;
 import com.example.chatserviceclean.dto.UserDTO;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class ChatService {
     private final SimpMessagingTemplate simpMessagingTemplate;
@@ -19,14 +23,20 @@ public class ChatService {
 
     public void sendMessageToRoom(Long roomId, Long senderId, MessageDTO messageDTO) {
         UserDTO userDTO = userWebClient.getUserById(senderId);
+
+        if (userDTO == null) {
+            log.error("User not found, cannot send message.");
+            throw new ResponseStatusException(HttpStatusCode.valueOf(404), "User not found");
+        }
+
         MessageDTO dtoWithSender = new MessageDTO(messageDTO.id(),
                 messageDTO.roomId(),
                 senderId,
                 messageDTO.content(),
                 messageDTO.createdAt(),
                 userDTO.username());
-        MessageDTO saved = messageWebClient.sendMessage(roomId, senderId, dtoWithSender);
 
+        MessageDTO saved = messageWebClient.sendMessage(roomId, senderId, dtoWithSender);
         simpMessagingTemplate.convertAndSend("/topic/room" + roomId, saved);
     }
 

@@ -13,6 +13,7 @@ import com.example.chatserviceclean.service.MemberShipService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -47,6 +48,12 @@ public class MemberShipServiceImpl implements MemberShipService {
 
         log.info("Member created successfully");
         UserDTO userDTO = userWebClient.getUserById(senderId);
+
+        if (userDTO == null) {
+            log.error("User not found, cannot send message.");
+            throw new ResponseStatusException(HttpStatusCode.valueOf(404), "User not found");
+        }
+
         MemberShip save = memberShipRepository.save(memberShip);
 
         MemberShipDTO dto = memberShipMapper.toDTO(save, userDTO);

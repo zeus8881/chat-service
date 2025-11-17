@@ -11,7 +11,8 @@ public interface MemberShipMapper {
     @Mapping(source = "memberShip.chat.id", target = "chatRoomId")
     @Mapping(source = "memberShip.userId", target = "userId")
     @Mapping(source = "memberShip.id", target = "id")
-    @Mapping(source = "userDTO", target = "userDTO  ")
+    @Mapping(source = "userDTO", target = "userDTO")
+    @Mapping(source = "memberShip.role", target = "role")
     MemberShipDTO toDTO(MemberShip memberShip, UserDTO userDTO);
 
     MemberShip toModel(MemberShipDTO memberShipDTO);

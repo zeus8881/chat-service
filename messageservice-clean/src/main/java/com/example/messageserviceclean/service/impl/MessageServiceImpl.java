@@ -50,6 +50,10 @@ public class MessageServiceImpl implements MessageService {
         message.setStatus(Status.DELIVERED);
 
         UserDTO userDTO = webClient.getUserById(senderId);
+        if (userDTO == null) {
+            log.error("User not found, cannot send message.");
+            throw new ResponseStatusException(HttpStatusCode.valueOf(404), "User not found");
+        }
         ChatRoomDTO chatRoomDTO = chatRoomWebClient.getChatRoomById(chatId);
 
         Message save = messageRepository.save(message);
@@ -88,6 +92,10 @@ public class MessageServiceImpl implements MessageService {
         List<MessageDTO> dtos = messagesList.stream()
                 .map(msg -> {
                     UserDTO userDTO = webClient.getUserById(msg.getSenderId());
+                    if (userDTO == null) {
+                        log.error("User not found. Cannot send message.");
+                        throw new ResponseStatusException(HttpStatusCode.valueOf(404), "User not found");
+                    }
                     ChatRoomDTO chatRoomDTO = chatRoomWebClient.getChatRoomById(msg.getRoomId());
                     return messageMapper.toDTO(msg, userDTO, chatRoomDTO);
                 })
@@ -114,6 +122,10 @@ public class MessageServiceImpl implements MessageService {
         message.setContent(newContent);
 
         UserDTO userDTO = webClient.getUserById(message.getSenderId());
+        if (userDTO == null) {
+            log.error("User not found, cannot send message!");
+            throw new ResponseStatusException(HttpStatusCode.valueOf(404), "User not found");
+        }
         ChatRoomDTO chatRoomDTO = chatRoomWebClient.getChatRoomById(message.getRoomId());
 
         Message save = messageRepository.save(message);

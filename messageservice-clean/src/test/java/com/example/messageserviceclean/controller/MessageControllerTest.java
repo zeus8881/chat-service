@@ -65,7 +65,7 @@ class MessageControllerTest {
 
     @BeforeEach
     void setUp() {
-        UserDTO userDTO = new UserDTO(1L, "Anton");
+        UserDTO userDTO = new UserDTO(1L, "Anton", "123", "1234567", "USER");
         ChatRoomDTO chatRoomDTO = new ChatRoomDTO(1L, "Chat room");
         Mockito.when(userWebClient.getUserById(Mockito.anyLong())).thenReturn(userDTO);
         Mockito.when(chatRoomWebClient.getChatRoomById(Mockito.anyLong())).thenReturn(chatRoomDTO);
