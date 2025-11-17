@@ -24,6 +24,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -99,7 +100,7 @@ public class MessageServiceImpl implements MessageService {
                     ChatRoomDTO chatRoomDTO = chatRoomWebClient.getChatRoomById(msg.getRoomId());
                     return messageMapper.toDTO(msg, userDTO, chatRoomDTO);
                 })
-                .toList();
+                .collect(Collectors.toList());
 
         return ResponseEntity.ok(dtos);
     }
